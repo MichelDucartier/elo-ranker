@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from typing import Dict, List
-from elo_ranker.api.constants import ATTRIBUTES_KEY, DEFAULT_INITIAL_ELO, DEFAULT_SPREAD, ENTRIES_KEY, INITIAL_ELO_KEY, SPREAD_KEY, TITLE_KEY
-from ranked_entry import RankedEntry
+
+import rich
+from .constants import ATTRIBUTES_KEY, DEFAULT_INITIAL_ELO, DEFAULT_SPREAD, ENTRIES_KEY, INITIAL_ELO_KEY, SPREAD_KEY, TITLE_KEY
+from .ranked_entry import RankedEntry
 import pickle
 import yaml
 import enum
@@ -41,16 +43,18 @@ class EloRanking:
             entry2: RankedEntry, 
             result: BattleResult):
 
+        print(result)
 
         elo1 = self.id2elo[entry1.uid()]
         elo2 = self.id2elo[entry2.uid()]
 
-        expected1 = 1 / (1 + 10 ** (elo2 - elo1) / self.spread)
+        expected1 = 1 / (1 + 10 ** ((elo2 - elo1) / self.spread))
         expected2 = 1 - expected1
         
         lr = max(self.get_learning_rate(entry1), self.get_learning_rate(entry2))
         
         entry1_win = -1
+
         if result == BattleResult.DRAW:
             entry1_win = 0.5
         elif result == BattleResult.ENTRY1_WIN:
@@ -64,6 +68,9 @@ class EloRanking:
 
         self.id2elo[entry1.uid()] = updated_elo1
         self.id2elo[entry2.uid()] = updated_elo2
+
+        self.id2num_matches[entry1.uid()] += 1
+        self.id2num_matches[entry2.uid()] += 1
 
 
     def get_learning_rate(self, entry: RankedEntry) -> int:
@@ -96,7 +103,7 @@ class EloRanking:
             raise ValueError(f"Config dict has no key {ENTRIES_KEY}")
         
         entries = list()
-        for entry_dict in config_dict:
+        for entry_dict in config_dict[ENTRIES_KEY]:
 
             if TITLE_KEY not in entry_dict:
                 raise ValueError(f"Missing {TITLE_KEY} in entry {entry_dict}")
@@ -116,3 +123,11 @@ class EloRanking:
         )
 
 
+    def pretty_print(self):
+        """Pretty prints all elements sorted by elo (from best to worst)."""
+        sorted_entries = sorted(self.id2elo.items(), key=lambda x: x[1], reverse=True)
+
+        rich.print("Elo Rankings (from best to worst):")
+        for i, (uid, elo) in enumerate(sorted_entries, start=1):
+            entry = self.id2entry[uid]
+            rich.print(f"{i}. {entry.title} - Elo: {elo}")

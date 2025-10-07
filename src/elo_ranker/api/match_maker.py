@@ -1,6 +1,6 @@
 from typing import Tuple
-from elo_ranker.api.ranked_entry import RankedEntry
-from elo_ranker.api.ranking import BattleResult, EloRanking
+from .ranked_entry import RankedEntry
+from .ranking import BattleResult, EloRanking
 
 import random
 
@@ -10,13 +10,16 @@ class MatchMaker:
 
 
     def match(self) -> Tuple[RankedEntry, RankedEntry]:
-        sorted_items = [v for k,v in sorted(self.ranking.id2entry, 
+        sorted_items = [k for k,v in sorted(self.ranking.id2num_matches.items(), 
                                             key=lambda item : item[1])]
         
-        selected_len = max(2, 0.1 * len(sorted_items))
+        selected_len = max(2, int(0.1 * len(sorted_items)))
         selected_items = sorted_items[:selected_len]
 
-        entry1, entry2 = random.sample(selected_items, 2)
+        entry1_id, entry2_id = random.sample(selected_items, 2)
+
+        entry1 = self.ranking.id2entry[entry1_id]
+        entry2 = self.ranking.id2entry[entry2_id]
 
         return entry1, entry2
 

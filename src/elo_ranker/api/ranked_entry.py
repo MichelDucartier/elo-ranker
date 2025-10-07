@@ -8,7 +8,7 @@ class RankedEntry:
                  attributes: Optional[Dict[str, str]] = None) -> None:
         self.title = title
 
-        if self.attributes is None:
+        if attributes is None:
             attributes = dict()
 
         self.attributes = attributes
@@ -19,4 +19,5 @@ class RankedEntry:
                 
     def __str__(self) -> str:
         return f"RankedEntry(title={self.title})"
+
         
