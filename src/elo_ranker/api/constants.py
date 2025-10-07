@@ -1,0 +1,8 @@
+TITLE_KEY = "title"
+ATTRIBUTES_KEY = "attributes"
+ENTRIES_KEY = "entries"
+INITIAL_ELO_KEY = "initial_elo"
+SPREAD_KEY = "spread"
+
+DEFAULT_INITIAL_ELO = 1000
+DEFAULT_SPREAD = 400
