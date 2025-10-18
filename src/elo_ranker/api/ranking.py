@@ -131,3 +131,6 @@ class EloRanking:
         for i, (uid, elo) in enumerate(sorted_entries, start=1):
             entry = self.id2entry[uid]
             rich.print(f"{i}. {entry.title} - Elo: {elo}")
+
+    def __len__(self):
+        return len(self.id2entry)
